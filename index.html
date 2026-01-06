@@ -1,22 +1,21 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Andhra Pradesh Gold Rates</title>
+    <title>Andhra Pradesh Live Gold Rates</title>
     <style>
-        /* CSS STYLES */
         :root {
-            --gold-primary: #D4AF37;
-            --gold-dark: #AA8C2C;
-            --bg-color: #f4f4f9;
-            --card-bg: #ffffff;
-            --text-main: #333;
+            --primary: #D4AF37; /* Gold */
+            --dark: #2c3e50;
+            --light: #f8f9fa;
+            --success: #27ae60;
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--bg-color);
+            font-family: 'Segoe UI', sans-serif;
+            background-color: #f0f2f5;
             display: flex;
             justify-content: center;
             align-items: center;
@@ -24,203 +23,191 @@
             margin: 0;
         }
 
-        .gold-card {
-            background: var(--card-bg);
-            width: 100%;
-            max-width: 400px;
+        .gold-widget {
+            background: white;
+            width: 380px;
             border-radius: 15px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
             overflow: hidden;
-            border-top: 5px solid var(--gold-primary);
+            border-top: 6px solid var(--primary);
         }
 
-        .card-header {
-            background: linear-gradient(135deg, #fff 0%, #f9f9f9 100%);
+        .header {
             padding: 20px;
             text-align: center;
+            background: #fff;
             border-bottom: 1px solid #eee;
         }
 
-        .card-header h2 {
-            margin: 0;
-            color: var(--text-main);
-            font-size: 1.5rem;
+        .header h2 { margin: 0; color: var(--dark); font-size: 1.4rem; }
+        .location { 
+            color: #7f8c8d; font-size: 0.9rem; margin-top: 5px; 
+            display: flex; justify-content: center; align-items: center; gap: 5px;
         }
 
-        .card-header span {
-            color: var(--gold-dark);
-            font-size: 0.9rem;
-            font-weight: 600;
-            display: block;
-            margin-top: 5px;
-        }
-
-        .location-badge {
-            background-color: #e8f5e9;
-            color: #2e7d32;
-            padding: 4px 12px;
+        .refresh-btn {
+            background: var(--dark);
+            color: white;
+            border: none;
+            padding: 5px 15px;
             border-radius: 20px;
+            cursor: pointer;
             font-size: 0.8rem;
-            display: inline-block;
-            margin-top: 8px;
+            margin-top: 10px;
         }
+        .refresh-btn:hover { background: #1a252f; }
 
-        .rate-grid {
-            padding: 20px;
-        }
+        .rates-list { padding: 10px 20px; }
 
-        .rate-row {
+        .rate-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
             padding: 15px 0;
-            border-bottom: 1px dashed #ddd;
+            border-bottom: 1px dashed #e0e0e0;
         }
+        
+        .rate-item:last-child { border-bottom: none; }
 
-        .rate-row:last-child {
-            border-bottom: none;
-        }
+        .karat-info { display: flex; flex-direction: column; }
+        .karat-name { font-weight: 700; color: var(--dark); font-size: 1.1rem; }
+        .karat-desc { font-size: 0.75rem; color: #95a5a6; }
 
-        .karat-label {
-            font-weight: bold;
-            color: #555;
-            display: flex;
-            flex-direction: column;
-        }
+        .price { font-weight: 700; font-size: 1.2rem; color: var(--dark); }
+        .price.main { color: #d35400; font-size: 1.4rem; } /* Highlight 24k */
 
-        .purity-tag {
-            font-size: 0.75rem;
-            color: #888;
-            font-weight: normal;
-        }
-
-        .price-display {
-            font-size: 1.2rem;
-            font-weight: 700;
-            color: var(--text-main);
-        }
-
-        .loading-text {
-            text-align: center;
-            color: #888;
-            padding: 20px;
-            font-style: italic;
-        }
-
-        .footer-note {
-            font-size: 0.75rem;
-            text-align: center;
-            color: #999;
+        .footer {
+            background: #f8f9fa;
             padding: 15px;
-            background: #fafafa;
+            text-align: center;
+            font-size: 0.75rem;
+            color: #7f8c8d;
         }
-
-        /* 24K Highlight */
-        .highlight {
-            color: var(--gold-dark);
-        }
+        
+        /* Loading State */
+        .loading { text-align: center; padding: 20px; color: #7f8c8d; }
     </style>
 </head>
 <body>
 
-<div class="gold-card">
-    <div class="card-header">
-        <h2>Today's Gold Rate</h2>
-        <span id="current-date">Loading date...</span>
-        <div class="location-badge">📍 Andhra Pradesh</div>
+<div class="gold-widget">
+    <div class="header">
+        <h2>Gold Rate Today</h2>
+        <div class="location">📍 Andhra Pradesh, India</div>
+        <button class="refresh-btn" onclick="fetchGoldRate()">🔄 Refresh Price</button>
     </div>
 
-    <div class="rate-grid" id="rates-container">
-        <div class="loading-text">Fetching latest market rates...</div>
+    <div id="rates-container">
+        <div class="loading">Loading live market data...</div>
     </div>
 
-    <div class="footer-note">
-        *Prices are per gram. Includes est. market premiums. <br> 
-        Rates fluctuate throughout the day.
+    <div class="footer">
+        *Prices include approx 15% Import Duty + 3% GST.<br>
+        Powered by GoldAPI.io
     </div>
 </div>
 
-<script>
-    // --- CONFIGURATION ---
-    // 1. Get a free key from https://www.goldapi.io/
-    // 2. Paste it below inside the quotes.
-    // 3. If you leave it empty, the code uses a "Mock" price for demonstration.
-    const API_KEY = 'goldapi-5ksmk23ln5e-io'; 
+<iframe 
+    src="https://goldbroker.com/widget/live-price/XAU?currency=INR&height=130" 
+    width="100%" 
+    height="130" 
+    style="border: 0; overflow: hidden; border-radius: 10px;">
+</iframe>
+<div style="text-align:center; font-size:10px; color:#888;">
+    Note: Above is International Spot Price. Add +18% for approx Market Rate.
+</div>
     
-    // --- DISPLAY DATE ---
-    const dateElement = document.getElementById('current-date');
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    dateElement.textContent = new Date().toLocaleDateString('en-IN', options);
+    
+<script>
+    // YOUR CONFIGURATION
+    const API_KEY = 'goldapi-5ksmk23ln5e-io'; 
+    const ENDPOINT = 'https://www.goldapi.io/api/XAU/INR';
 
-    // --- MAIN LOGIC ---
-    async function fetchGoldRates() {
+    async function fetchGoldRate() {
         const container = document.getElementById('rates-container');
-        let price24k = 0;
+        container.innerHTML = '<div class="loading">Updating rates...</div>';
 
         try {
-            if (API_KEY) {
-                // REAL API CALL
-                const response = await fetch('https://www.goldapi.io/api/XAU/INR', {
-                    method: 'GET',
-                    headers: {
-                        'x-access-token': API_KEY,
-                        'Content-Type': 'application/json'
-                    }
-                });
-                
-                if (!response.ok) throw new Error('API Limit Reached or Error');
-                
-                const data = await response.json();
-                
-                // data.price is per Ounce. 1 Ounce = 31.1035 Grams
-                // We also add ~15-18% for Import Duty/GST/Premium in Andhra market
-                const rawPricePerGram = data.price / 31.1035;
-                const taxAndPremiumMultiplier = 1.18; 
-                price24k = rawPricePerGram * taxAndPremiumMultiplier;
+            const response = await fetch(ENDPOINT, {
+                method: 'GET',
+                headers: {
+                    'x-access-token': API_KEY,
+                    'Content-Type': 'application/json'
+                }
+            });
 
-            } else {
-                // FALLBACK / DEMO MODE (If no API Key provided)
-                console.warn("No API Key. Using Demo Data.");
-                // Simulating a realistic price around ₹7,800 - ₹8,000 range
-                price24k = 7850.00; 
+            if (!response.ok) {
+                throw new Error('API Limit Reached or Network Error');
             }
 
-            // Calculate other karats
+            const data = await response.json();
+
+            // --- CALCULATION LOGIC FOR ANDHRA MARKET ---
+            
+            // 1. Get Raw Price per Gram (API gives price per Ounce)
+            // 1 Ounce = 31.1035 Grams
+            let rawPricePerGram = data.price / 31.1035;
+
+            // 2. Add Indian Taxes (Import Duty 15% + GST 3% + Local Premium)
+            // International spot price is cheaper than Indian market price.
+            // We multiply by 1.185 to approximate the real shop price in AP.
+            let marketPrice24k = rawPricePerGram * 1.185;
+
+            // 3. Calculate Purities
             const rates = {
-                '24k': Math.floor(price24k),
-                '22k': Math.floor(price24k * 0.916),
-                '20k': Math.floor(price24k * 0.833),
-                '18k': Math.floor(price24k * 0.750)
+                k24: Math.floor(marketPrice24k),
+                k22: Math.floor(marketPrice24k * 0.916),
+                k20: Math.floor(marketPrice24k * 0.833),
+                k18: Math.floor(marketPrice24k * 0.750)
             };
 
-            // Generate HTML
+            // 4. Update UI
             container.innerHTML = `
-                <div class="rate-row">
-                    <div class="karat-label">24 Carat <span class="purity-tag">99.9% Pure</span></div>
-                    <div class="price-display highlight">₹${rates['24k'].toLocaleString('en-IN')}</div>
+                <div class="rate-item">
+                    <div class="karat-info">
+                        <span class="karat-name">24 Karat</span>
+                        <span class="karat-desc">99.9% Pure Gold</span>
+                    </div>
+                    <div class="price main">₹${rates.k24.toLocaleString('en-IN')}</div>
                 </div>
-                <div class="rate-row">
-                    <div class="karat-label">22 Carat <span class="purity-tag">Standard Jewellery</span></div>
-                    <div class="price-display">₹${rates['22k'].toLocaleString('en-IN')}</div>
+
+                <div class="rate-item">
+                    <div class="karat-info">
+                        <span class="karat-name">22 Karat</span>
+                        <span class="karat-desc">Standard Jewellery</span>
+                    </div>
+                    <div class="price">₹${rates.k22.toLocaleString('en-IN')}</div>
                 </div>
-                <div class="rate-row">
-                    <div class="karat-label">20 Carat <span class="purity-tag">Antique/Traditional</span></div>
-                    <div class="price-display">₹${rates['20k'].toLocaleString('en-IN')}</div>
+
+                <div class="rate-item">
+                    <div class="karat-info">
+                        <span class="karat-name">20 Karat</span>
+                        <span class="karat-desc">Traditional / Antique</span>
+                    </div>
+                    <div class="price">₹${rates.k20.toLocaleString('en-IN')}</div>
                 </div>
-                <div class="rate-row">
-                    <div class="karat-label">18 Carat <span class="purity-tag">Diamond/Stone Work</span></div>
-                    <div class="price-display">₹${rates['18k'].toLocaleString('en-IN')}</div>
+
+                <div class="rate-item">
+                    <div class="karat-info">
+                        <span class="karat-name">18 Karat</span>
+                        <span class="karat-desc">Diamond / Stone Work</span>
+                    </div>
+                    <div class="price">₹${rates.k18.toLocaleString('en-IN')}</div>
                 </div>
             `;
 
         } catch (error) {
             console.error(error);
-            container.innerHTML = `<div class="loading-text" style="color:red;">Error loading rates. Please refresh.</div>`;
+            container.innerHTML = `
+                <div style="text-align:center; padding:20px; color:red;">
+                    <strong>Error:</strong> Failed to load.<br>
+                    <small>Check your API Key quota.</small>
+                </div>`;
         }
     }
 
-    // Run on load
-    fetchGoldRates();
+    // Run on Page Load
+    fetchGoldRate();
 
 </script>
 
